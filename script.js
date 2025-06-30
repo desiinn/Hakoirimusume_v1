@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeGame() {
         for (const piece of pieces) {
             const pos = initialPositions[piece.id];
-            if (pos) {
+            if (pos) 
                 piece.style.top = (pos.top * GRID_SIZE) + 'px';
                 piece.style.left = (pos.left * GRID_SIZE) + 'px';
             }
@@ -193,12 +193,4 @@ document.addEventListener('DOMContentLoaded', () => {
         if (daughterGridX === 1 && daughterGridY === 3) {
             daughterPiece.classList.add('cleared');
             finalMoveCountSpan.textContent = moveCount;
-            setTimeout(() => {
-                clearModal.classList.add('active');
-            }, 500);
-        }
-    }
-
-    // ---- ゲーム開始 ----
-    initializeGame();
-});
+            setTimeout
