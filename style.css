@@ -1,0 +1,353 @@
+:root {
+    --grid-size: 80px;
+    /* ★ bodyの背景色を変数として定義 */
+    --body-bg-start: #fdfbfb;
+    --body-bg-end: #ebedee;
+}
+
+body {
+    font-family: 'Kiwi Maru', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f2f5; 
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #4a4a4a;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+#game-container {
+    position: relative;
+    margin-bottom: 50px;
+}
+
+#board {
+    position: relative;
+    width: calc(var(--grid-size) * 4);
+    height: calc(var(--grid-size) * 5);
+    background-color: #f0f2f5; 
+    border: 5px solid #6b7280; 
+    border-radius: 12px;
+    box-shadow:
+        inset 0 0 15px rgba(0, 0, 0, 0.1),
+        0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ★★★ マスク役とテキスト役をboardの疑似要素で完結させる ★★★ */
+
+/* マスク役 (::afterを使用) */
+#board::after {
+    content: '';
+    position: absolute;
+    bottom: -5px; /* 盤面の下枠線に正確に重ねる */
+    left: var(--grid-size);
+    width: calc(var(--grid-size) * 2);
+    height: 5px; /* 枠線の太さと同じにする */
+    background-color: #f0f2f5; /* bodyと同じ背景色で下の枠線を塗りつぶす */
+    z-index: 1; /* 枠線と影よりも手前に表示する */
+}
+
+/* テキスト役 (::beforeを使用) */
+#board::before {
+    content: '出口';
+    position: absolute;
+    bottom: -27px; /* パズル側に寄せるための位置調整 */
+    left: var(--grid-size);
+    width: calc(var(--grid-size) * 2);
+    text-align: center;
+    font-size: 1rem;
+    color: #888;
+    font-weight: bold;
+    z-index: 2; /* 念のためマスクよりもさらに手前に */
+}
+
+
+.piece {
+    position: absolute;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-bottom: 3px solid rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #4a4a4a;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+    cursor: grab;
+    transition: all 0.15s ease-out;
+    user-select: none;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.piece.dragging {
+    cursor: grabbing;
+    z-index: 10;
+    transform: scale(1.05) translateY(-5px);
+    border-bottom-width: 5px;
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
+}
+
+.size-2x2 { width: calc(var(--grid-size) * 2); height: calc(var(--grid-size) * 2); }
+.size-2x1 { width: calc(var(--grid-size) * 2); height: calc(var(--grid-size) * 1); }
+.size-1x2 { width: calc(var(--grid-size) * 1); height: calc(var(--grid-size) * 2); }
+.size-1x1 { width: calc(var(--grid-size) * 1); height: calc(var(--grid-size) * 1); }
+
+#daughter {
+    background: linear-gradient(to bottom, #ffdae0, #ffb6c1);
+}
+#father, #mother {
+    background: linear-gradient(to bottom, #d6f5f7, #add8e6);
+}
+#bantou {
+    background: linear-gradient(to bottom, #eef0f2, #c8d6e5);
+}
+#butler, #maid {
+    background: linear-gradient(to bottom, #e0ffff, #b0e0e6);
+}
+#guard1, #guard2, #guard3, #guard4 {
+    background: linear-gradient(to bottom, #fff5cc, #ffe4b5);
+}
+
+/* ==================================== */
+/*   コマごとのフォントと表示の調整     */
+/* ==================================== */
+#daughter {
+    font-size: 3.2rem;
+    font-weight: 700;
+}
+#father, #mother {
+    font-size: 1.8rem;
+}
+#butler, #maid {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    letter-spacing: 0.1em;
+    font-size: 1.4rem;
+}
+#guard1, #guard2, #guard3, #guard4 {
+    font-size: 1rem;
+}
+#bantou {
+    font-size: 1.2rem;
+}
+
+/* ==================================== */
+/*        操作パネルのスタイル          */
+/* ==================================== */
+
+#controls {
+    /* ★★★ 重複定義を統合し、正しいスタイルを適用 ★★★ */
+    background-color: white;
+    padding: 15px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 30px; /* 要素間のスペース */
+    margin-top: 0; /* game-containerのmargin-bottomで調整するため不要 */
+}
+
+#controls p {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #555;
+    
+    /* ★★★ ここから追加 ★★★ */
+    /* 3桁表示になってもガタつかない程度の最小幅を確保 */
+    min-width: 100px; 
+    text-align: left; /* 左揃えにする（お好みでcenterでも可） */
+}
+
+#reset-button {
+    /* ★★★ 重複定義を統合し、正しいスタイルを適用 ★★★ */
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    background-color: #e55039;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#reset-button:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+#reset-button:active {
+    transform: translateY(0);
+}
+
+/* ==================================== */
+/*        クリア演出用モーダル          */
+/* ==================================== */
+
+/* モーダルの黒い半透明の背景 */
+.modal-overlay {
+    position: fixed; /* 画面全体を覆う */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* 半透明の黒 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* ★ 最初は非表示にしておく */
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0.3s, opacity 0.3s;
+    z-index: 1000; /* 最前面に表示 */
+}
+
+/* モーダル表示時に適用するクラス */
+.modal-overlay.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* メッセージが表示される白いボックス */
+.modal-content {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    
+    /* ★ 表示時のアニメーション */
+    transform: scale(0.8);
+    transition: transform 0.3s ease-out;
+}
+
+/* モーダル表示時にコンテンツをアニメーションさせる */
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-content h2 {
+    font-size: 3rem;
+    color: #e55039; /* リセットボタンと同じ色 */
+    margin: 0 0 10px;
+}
+
+.modal-content p {
+    font-size: 1.2rem;
+    color: #555;
+    margin: 10px 0;
+}
+
+#play-again-button {
+    margin-top: 20px;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
+    background-color: #3498db; /* 別の色で差別化 */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+#play-again-button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+/* キラキラさせるアニメーションの定義 */
+@keyframes sparkle {
+    0% { box-shadow: 0 2px 3px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4), 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ffaf40; }
+    50% { box-shadow: 0 2px 3px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4), 0 0 15px #fff, 0 0 25px #fff, 0 0 35px #ffaf40; }
+    100% { box-shadow: 0 2px 3px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4), 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ffaf40; }
+}
+
+/* クリアした娘に適用するクラス */
+.cleared {
+    animation: sparkle 1s ease-in-out infinite;
+}
+
+/* ==================================== */
+/*        ヘルプボタンのスタイル        */
+/* ==================================== */
+#help-button {
+    order: -1; /* flexboxの並び順を一番左にする */
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #555;
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 50%; /* 丸いボタンにする */
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#help-button:hover {
+    background-color: #f0f2f5;
+    border-color: #999;
+    transform: scale(1.05);
+}
+
+/* ==================================== */
+/*       ルール説明モーダルのスタイル     */
+/* ==================================== */
+
+/* 見やすいリストのデザイン */
+.rule-list {
+    list-style: none;
+    padding: 0;
+    margin: 25px 0;
+    text-align: left;
+    max-width: 400px;
+}
+
+.rule-list li {
+    margin-bottom: 15px;
+    line-height: 1.6;
+    padding-left: 30px; /* アイコン用のスペース */
+    position: relative;
+    font-size: 1.1rem;
+}
+
+/* リストのアイコンを疑似要素で作成 */
+.rule-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #3498db; /* 青色 */
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+/* 閉じるボタンのデザイン */
+#close-rule-button {
+    margin-top: 10px;
+    padding: 10px 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #555;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#close-rule-button:hover {
+    background-color: #ddd;
+}

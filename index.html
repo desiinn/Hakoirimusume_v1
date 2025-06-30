@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>箱入り娘 パズル</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>箱入り娘 パズル</h1>
+
+    <div id="game-container">
+        <div id="board">
+            <!-- コマをJavaScriptで動的に配置しますが、最初はここに直接書いてもOK -->
+            <div id="daughter"class="piece size-2x2">娘</div>
+            <div id="father"   class="piece size-1x2">父</div>
+            <div id="mother"   class="piece size-1x2">母</div>
+                        <div id="bantou"   class="piece size-2x1">番頭</div> 
+            <div id="butler"   class="piece size-1x2">下男</div>
+            <div id="maid"       class="piece size-1x2">下女</div>
+            <div id="guard1"   class="piece size-1x1">小僧</div>
+            <div id="guard2"   class="piece size-1x1">小僧</div>
+            <div id="guard3"   class="piece size-1x1">小僧</div>
+            <div id="guard4"   class="piece size-1x1">小僧</div>
+        </div>
+        <div id="exit"></div>
+    </div>
+
+    <div id="controls">
+        <button id="help-button">？</button>
+        <button id="reset-button">リセット</button>
+        <p>手数: <span id="move-count">0</span></p>
+    </div>
+
+ <!-- ★★★ ここからクリア演出用モーダルを追加 ★★★ -->
+    <div id="clear-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>CLEAR!</h2>
+            <p>おめでとうございます！</p>
+            <p>手数: <span id="final-move-count">0</span></p>
+            <button id="play-again-button">もう一度遊ぶ</button>
+        </div>
+    </div>
+<!-- ★★★ ここからルール説明用モーダルを追加 ★★★ -->
+    <div id="rule-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>遊び方</h2>
+            <ul class="rule-list">
+                <li>「娘」のコマを盤面下の出口までスライドさせるパズルです。</li>
+                <li>コマはドラッグして、空いているスペースに動かせます。</li>
+                <li>他のコマを飛び越えることはできません。</li>
+            </ul>
+            <button id="close-rule-button">閉じる</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
