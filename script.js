@@ -1,4 +1,4 @@
-// 修正後の script.js
+// 修正済みの完全な script.js
 document.addEventListener('DOMContentLoaded', () => {
     // ---- 変数・定数の定義 ----
     const GRID_SIZE = 80;
@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearModal = document.getElementById('clear-modal');
     const finalMoveCountSpan = document.getElementById('final-move-count');
     const playAgainButton = document.getElementById('play-again-button');
-// ★★★ ルール説明関連の要素を取得 ★★★
     const helpButton = document.getElementById('help-button');
     const ruleModal = document.getElementById('rule-modal');
     const closeRuleButton = document.getElementById('close-rule-button');
@@ -50,12 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---- イベントリスナーの登録 ----
     pieces.forEach(piece => {
         piece.addEventListener('mousedown', startDrag);
-        // ★★★ タッチイベントを追加 ★★★
-    piece.addEventListener('touchstart', startDrag, { passive: false });
+        piece.addEventListener('touchstart', startDrag, { passive: false });
     });
     resetButton.addEventListener('click', initializeGame);
 
-    // ★★★ このブロックをリスナー登録セクションに移動しました ★★★
     playAgainButton.addEventListener('click', () => {
         clearModal.classList.remove('active');
         const daughterPiece = document.getElementById('daughter');
@@ -65,57 +62,45 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeGame();
     });
 
-// ★★★ ヘルプボタンのクリックイベント ★★★
     helpButton.addEventListener('click', () => {
         ruleModal.classList.add('active');
     });
 
-// ★★★ ルールを閉じるボタンのクリックイベント ★★★
     closeRuleButton.addEventListener('click', () => {
         ruleModal.classList.remove('active');
     });
 
-// ★★★ 背景をクリックしてもモーダルが閉じるようにする ★★★
     ruleModal.addEventListener('click', (event) => {
-        // クリックされたのが背景（.modal-overlay自身）の場合のみ閉じる
         if (event.target === ruleModal) {
             ruleModal.classList.remove('active');
         }
     });
 
     // ---- ドラッグ開始処理 ----
-    // ---- ドラッグ開始処理 ----
     function startDrag(e) {
-        // タッチ操作でのスクロールを防止
         e.preventDefault(); 
-        
-        activePiece = e.target.closest('.piece'); // e.targetが中の文字の場合も考慮
+        activePiece = e.target.closest('.piece');
         if (!activePiece) return;
         
         activePiece.classList.add('dragging');
-    
-        // マウスとタッチで座標取得を共通化
         const touch = e.type === 'touchstart' ? e.touches[0] : e;
         startX = touch.clientX;
         startY = touch.clientY;
         
         pieceStartX = activePiece.offsetLeft;
-        // ★★★ ここのタイポを修正しました ★★★
-        pieceStartY = activePiece.offsetTop;
+        // ★★★ ここのタイプミスを修正しました ★★★
+        pieceStartY = activePiece.offsetTop; 
     
         document.addEventListener('mousemove', drag);
         document.addEventListener('touchmove', drag, { passive: false });
         document.addEventListener('mouseup', endDrag);
         document.addEventListener('touchend', endDrag);
     }
+    
     // ---- ドラッグ中の処理 ----
     function drag(e) {
         if (!activePiece) return;
-        
-        // ★★★ タッチ操作でのスクロールを防止 ★★★
         e.preventDefault();
-    
-        // ★★★ マウスとタッチで座標取得を共通化 ★★★
         const touch = e.type === 'touchmove' ? e.touches[0] : e;
         const dx = touch.clientX - startX;
         const dy = touch.clientY - startY;
@@ -130,18 +115,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ---- ドラッグ終了処理 ----
-   function endDrag(e) {
+    function endDrag(e) {
         if (!activePiece) return;
-        
-        // ★★★ マウスとタッチ両方のリスナーを削除 ★★★
         document.removeEventListener('mousemove', drag);
         document.removeEventListener('touchmove', drag);
         document.removeEventListener('mouseup', endDrag);
         document.removeEventListener('touchend', endDrag);
+
         const finalLeft = activePiece.offsetLeft;
         const finalTop = activePiece.offsetTop;
         const targetGridX = Math.round(finalLeft / GRID_SIZE);
         const targetGridY = Math.round(finalTop / GRID_SIZE);
+
         if (isMoveValid(activePiece, targetGridX, targetGridY)) {
             const targetPixelX = targetGridX * GRID_SIZE;
             const targetPixelY = targetGridY * GRID_SIZE;
@@ -209,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     }
 
-   // ---- クリア条件のチェック ----
+    // ---- クリア条件のチェック ----
     function checkWinCondition() {
         const daughterPiece = document.getElementById('daughter');
         if (!daughterPiece) return;
