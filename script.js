@@ -84,29 +84,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ---- ドラッグ開始処理 ----
+    // ---- ドラッグ開始処理 ----
     function startDrag(e) {
-    // ★★★ タッチ操作でのスクロールを防止 ★★★
+        // タッチ操作でのスクロールを防止
         e.preventDefault(); 
-    
+        
         activePiece = e.target.closest('.piece'); // e.targetが中の文字の場合も考慮
         if (!activePiece) return;
-    
+        
         activePiece.classList.add('dragging');
-
-        // ★★★ マウスとタッチで座標取得を共通化 ★★★
+    
+        // マウスとタッチで座標取得を共通化
         const touch = e.type === 'touchstart' ? e.touches[0] : e;
         startX = touch.clientX;
         startY = touch.clientY;
         
         pieceStartX = activePiece.offsetLeft;
-        pieceStartY = active-piece.offsetTop;
+        // ★★★ ここのタイポを修正しました ★★★
+        pieceStartY = activePiece.offsetTop;
     
         document.addEventListener('mousemove', drag);
-        document.addEventListener('touchmove', drag, { passive: false }); // ★★★追加
+        document.addEventListener('touchmove', drag, { passive: false });
         document.addEventListener('mouseup', endDrag);
-        document.addEventListener('touchend', endDrag); // ★★★追加
+        document.addEventListener('touchend', endDrag);
     }
-
     // ---- ドラッグ中の処理 ----
     function drag(e) {
         if (!activePiece) return;
