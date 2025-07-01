@@ -50,6 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---- イベントリスナーの登録 ----
     pieces.forEach(piece => {
         piece.addEventListener('mousedown', startDrag);
+        // ★★★ タッチイベントを追加 ★★★
+    piece.addEventListener('touchstart', startDrag, { passive: false });
     });
     resetButton.addEventListener('click', initializeGame);
 
@@ -83,22 +85,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ---- ドラッグ開始処理 ----
     function startDrag(e) {
-        e.preventDefault();
-        activePiece = e.target;
+    // ★★★ タッチ操作でのスクロールを防止 ★★★
+        e.preventDefault(); 
+    
+        activePiece = e.target.closest('.piece'); // e.targetが中の文字の場合も考慮
+        if (!activePiece) return;
+    
         activePiece.classList.add('dragging');
-        startX = e.clientX;
-        startY = e.clientY;
+
+        // ★★★ マウスとタッチで座標取得を共通化 ★★★
+        const touch = e.type === 'touchstart' ? e.touches[0] : e;
+        startX = touch.clientX;
+        startY = touch.clientY;
+        
         pieceStartX = activePiece.offsetLeft;
-        pieceStartY = activePiece.offsetTop;
+        pieceStartY = active-piece.offsetTop;
+    
         document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag, { passive: false }); // ★★★追加
         document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag); // ★★★追加
     }
 
     // ---- ドラッグ中の処理 ----
     function drag(e) {
         if (!activePiece) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
+        
+        // ★★★ タッチ操作でのスクロールを防止 ★★★
+        e.preventDefault();
+    
+        // ★★★ マウスとタッチで座標取得を共通化 ★★★
+        const touch = e.type === 'touchmove' ? e.touches[0] : e;
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+        
         if (Math.abs(dx) > Math.abs(dy)) {
             activePiece.style.left = (pieceStartX + dx) + 'px';
             activePiece.style.top = pieceStartY + 'px';
@@ -109,10 +129,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ---- ドラッグ終了処理 ----
-    function endDrag(e) {
+   function endDrag(e) {
         if (!activePiece) return;
+        
+        // ★★★ マウスとタッチ両方のリスナーを削除 ★★★
         document.removeEventListener('mousemove', drag);
+        document.removeEventListener('touchmove', drag);
         document.removeEventListener('mouseup', endDrag);
+        document.removeEventListener('touchend', endDrag);
         const finalLeft = activePiece.offsetLeft;
         const finalTop = activePiece.offsetTop;
         const targetGridX = Math.round(finalLeft / GRID_SIZE);
